@@ -10,7 +10,7 @@ with open(path.join(here,'README.md'),encoding='utf-8') as f:
 
 setup(
 	name='DWDocumentDB',
-	version='1.0.0b1',
+	version='1.0.0b2',
 	description='Python library wrapper for pydocumentdb',
 	long_description=long_description,
 	url='https://github.com/kurniawano/DWDocumentDB',
@@ -20,8 +20,8 @@ setup(
 	classifiers=[
 	'Development Status :: 4 - Beta',
 	'Intended Audience :: Education',
-	'license :: OSI Approved :: MIT license',
-	'Programming Language :: PYthon :: 2.7'
+	'License :: OSI Approved :: MIT License',
+	'Programming Language :: Python :: 2.7'
 	],
 	keywords='documentdb microsoft api wrapper',
 	packages=find_packages(exclude=['contrib','docs','tests']),
