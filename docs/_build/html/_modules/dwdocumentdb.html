@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dwdocumentdb &mdash; DWDocumentDB Docs 1.0.0b2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0b2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="DWDocumentDB Docs 1.0.0b2 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dwdocumentdb</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pydocumentdb</span> <span class="kn">import</span> <span class="n">document_client</span>
+
+<div class="viewcode-block" id="DWDocumentDB"><a class="viewcode-back" href="../index.html#dwdocumentdb.DWDocumentDB">[docs]</a><span class="k">class</span> <span class="nc">DWDocumentDB</span><span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;DWDocumentDB class.</span>
+
+<span class="sd">	Main class. You need to create an instance of this class to use the api.&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">host</span><span class="p">,</span> <span class="n">masterkey</span><span class="p">,</span> <span class="n">dbname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">collname</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		host: url for DocumentDB resource, e.g. https://mydb.documents.azure.com:443/</span>
+<span class="sd">		      obtain from portal.azure.com</span>
+<span class="sd">		masterkey: key for your DocumentDB resource. Obtain from portal.azure.com.</span>
+<span class="sd">		dbname: Name of your database. String. If the database is not found, it will create one. If it is left empty, you will need to set it later on.</span>
+<span class="sd">		collname: Name of your collection. String. If the collection is not found, it will create one. If it is left empty, you will need to set it later on.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">=</span><span class="n">document_client</span><span class="o">.</span><span class="n">DocumentClient</span><span class="p">(</span><span class="n">host</span><span class="p">,{</span><span class="s1">&#39;masterKey&#39;</span><span class="p">:</span><span class="n">masterkey</span><span class="p">})</span>
+		<span class="k">if</span> <span class="n">dbname</span><span class="o">!=</span><span class="bp">None</span> <span class="ow">and</span> <span class="n">collname</span><span class="o">!=</span><span class="bp">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">setDBCollection</span><span class="p">(</span><span class="n">dbname</span><span class="p">,</span><span class="n">collname</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">dbname</span><span class="o">!=</span><span class="bp">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">setDB</span><span class="p">(</span><span class="n">dbname</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">_getDB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dbname</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">db</span><span class="o">=</span><span class="nb">next</span><span class="p">((</span><span class="n">data</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ReadDatabases</span><span class="p">()</span> <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">dbname</span><span class="p">))</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="n">db</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">createDB</span><span class="p">(</span><span class="n">dbname</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">db</span> 
+
+	<span class="k">def</span> <span class="nf">_getCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">db</span><span class="p">,</span> <span class="n">collname</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">coll</span><span class="o">=</span><span class="nb">next</span><span class="p">((</span><span class="n">data</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ReadCollections</span><span class="p">(</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;_self&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">collname</span><span class="p">))</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="n">coll</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">createCollection</span><span class="p">(</span><span class="n">collname</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">coll</span> 
+
+	<span class="k">def</span> <span class="nf">_getDocument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">coll</span><span class="p">,</span> <span class="n">docname</span><span class="p">):</span>
+		<span class="n">doc</span><span class="o">=</span><span class="nb">next</span><span class="p">((</span><span class="n">data</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ReadDocuments</span><span class="p">(</span><span class="n">coll</span><span class="p">[</span><span class="s1">&#39;_self&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">docname</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">doc</span> 
+
+	<span class="k">def</span> <span class="nf">setDB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dbname</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDB</span><span class="p">(</span><span class="n">dbname</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">setCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">collname</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">coll</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">,</span><span class="n">collname</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">setDBCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dbname</span><span class="p">,</span><span class="n">collname</span><span class="p">):</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDB</span><span class="p">(</span><span class="n">dbname</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">coll</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">,</span> <span class="n">collname</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">createDB</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dbname</span><span class="p">):</span>
+		<span class="c1"># Attempt to delete the database.  This allows this to be used to recreate as well as create</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">db</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">data</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ReadDatabases</span><span class="p">()</span> <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">dbname</span><span class="p">))</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">DeleteDatabase</span><span class="p">(</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;_self&#39;</span><span class="p">])</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="k">pass</span>
+		<span class="c1"># Create database</span>
+		<span class="n">db</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">CreateDatabase</span><span class="p">({</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">dbname</span> <span class="p">})</span>
+		<span class="k">return</span> <span class="n">db</span>
+
+	<span class="k">def</span> <span class="nf">createCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">collname</span><span class="p">,</span><span class="n">offerType</span><span class="o">=</span><span class="s1">&#39;S1&#39;</span><span class="p">):</span>
+		<span class="n">coll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">CreateCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;_self&#39;</span><span class="p">],{</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">collname</span> <span class="p">},</span> <span class="p">{</span> <span class="s1">&#39;offerType&#39;</span><span class="p">:</span> <span class="n">offerType</span> <span class="p">})</span>
+		<span class="k">return</span> <span class="n">coll</span>
+
+	<span class="k">def</span> <span class="nf">deleteCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">collname</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">collname</span><span class="o">!=</span><span class="bp">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">setCollection</span><span class="p">(</span><span class="n">collname</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">DeleteCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coll</span><span class="p">[</span><span class="s1">&#39;_self&#39;</span><span class="p">])</span>
+
+	<span class="k">def</span> <span class="nf">deleteDatabase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dbname</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">dbname</span><span class="o">!=</span><span class="bp">None</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">setDB</span><span class="p">(</span><span class="n">dbname</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">DeleteDatabase</span><span class="p">(</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;_self&#39;</span><span class="p">])</span>
+
+	<span class="k">def</span> <span class="nf">deleteDocument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">docname</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">doc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDocument</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collname</span><span class="p">,</span><span class="n">docname</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">DeleteDocument</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="s1">&#39;_self&#39;</span><span class="p">])</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="k">print</span> <span class="s1">&#39;Error. Have you set database and collection? Check your document name.&#39;</span>
+			
+	<span class="k">def</span> <span class="nf">readDocument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">docname</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">coll</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coll</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="k">print</span> <span class="s2">&quot;No collection has been set. Please call setDBCollection.&quot;</span>
+			<span class="k">return</span>
+		<span class="n">doc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDocument</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">docname</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">key</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">doc</span>
+		<span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+			<span class="n">keys</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">doc</span>
+			<span class="k">for</span> <span class="n">eachkey</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="n">eachkey</span><span class="p">]</span>
+			<span class="k">return</span> <span class="n">data</span>
+		<span class="k">return</span> <span class="n">doc</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+	<span class="k">def</span> <span class="nf">replaceDocument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">docname</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">coll</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coll</span>
+		<span class="k">except</span><span class="p">:</span>
+			<span class="k">print</span> <span class="s2">&quot;No collection has been set. Please call setDBCollection.&quot;</span>
+			<span class="k">return</span>
+		<span class="n">olddoc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDocument</span><span class="p">(</span><span class="n">coll</span><span class="p">,</span> <span class="n">docname</span><span class="p">)</span>
+		<span class="n">uri</span><span class="o">=</span><span class="n">olddoc</span><span class="p">[</span><span class="s1">&#39;_self&#39;</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">key</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+			<span class="n">newdoc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ReplaceDocument</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">newdoc</span>
+		<span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+			<span class="n">keys</span><span class="o">=</span><span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+			<span class="n">ndict</span><span class="o">=</span><span class="n">olddoc</span>
+			<span class="k">for</span> <span class="n">eachkey</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+				<span class="n">ndict</span><span class="o">=</span><span class="n">ndict</span><span class="p">[</span><span class="n">eachkey</span><span class="p">]</span>
+			<span class="n">ndict</span><span class="p">[</span><span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">=</span><span class="n">data</span> 
+			<span class="n">newdoc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ReplaceDocument</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span><span class="n">olddoc</span><span class="p">)</span>
+			<span class="k">return</span> <span class="n">newdoc</span>
+		<span class="n">olddoc</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="n">data</span>
+		<span class="n">newdoc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">ReplaceDocument</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span><span class="n">olddoc</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">newdoc</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Oka Kurniawan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

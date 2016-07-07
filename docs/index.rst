@@ -12,6 +12,10 @@ Contents:
    :maxdepth: 2
 
 
+DWDocumentDB Class
+==================
+.. autoclass:: dwdocumentdb.DWDocumentDB
+   :members:
 
 Indices and tables
 ==================
