@@ -76,13 +76,13 @@ class DWDocumentDB:
 			doc=self._getDocument(self.collname,docname)
 			self.client.DeleteDocument(doc['_self'])
 		except:
-			print 'Error. Have you set database and collection? Check your document name.'
+			print('Error. Have you set database and collection? Check your document name.')
 			
 	def readDocument(self,docname, key=None):
 		try:
 			coll=self.coll
 		except:
-			print "No collection has been set. Please call setDBCollection."
+			print("No collection has been set. Please call setDBCollection.")
 			return
 		doc=self._getDocument(coll, docname)
 		if key==None:
@@ -99,7 +99,7 @@ class DWDocumentDB:
 		try:
 			coll=self.coll
 		except:
-			print "No collection has been set. Please call setDBCollection."
+			print("No collection has been set. Please call setDBCollection.")
 			return
 		olddoc=self._getDocument(coll, docname)
 		uri=olddoc['_self']
