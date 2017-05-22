@@ -1,5 +1,5 @@
-from pydocumentdb import document_client
 from __future__ import print_function
+from pydocumentdb import document_client
 
 class DWDocumentDB:
 	"""DWDocumentDB class.
