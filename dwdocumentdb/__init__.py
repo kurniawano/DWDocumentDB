@@ -2,7 +2,17 @@ from pydocumentdb import document_client
 from __future__ import print_function
 
 class DWDocumentDB:
+	"""DWDocumentDB class.
+
+	Main class. You need to create an instance of this class to use the api."""
 	def __init__(self,host, masterkey, dbname=None,collname=None):
+		"""
+		host: url for DocumentDB resource, e.g. https://mydb.documents.azure.com:443/
+		      obtain from portal.azure.com
+		masterkey: key for your DocumentDB resource. Obtain from portal.azure.com.
+		dbname: Name of your database. String. If the database is not found, it will create one. If it is left empty, you will need to set it later on.
+		collname: Name of your collection. String. If the collection is not found, it will create one. If it is left empty, you will need to set it later on.
+		"""
 		self.client=document_client.DocumentClient(host,{'masterKey':masterkey})
 		if dbname!=None and collname!=None:
 			self.setDBCollection(dbname,collname)
